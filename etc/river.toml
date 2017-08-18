@@ -1,8 +1,8 @@
 # MySQL address, user and password
 # user must have replication privilege in MySQL.
-my_addr = "127.0.0.1:3306"
+my_addr = "office:3306"
 my_user = "root"
-my_pass = ""
+my_pass = "root"
 my_charset = "utf8"
 
 # Elasticsearch address
@@ -12,14 +12,14 @@ es_user = ""
 es_pass = ""
 
 # Path to store data, like master.info, if not set or empty,
-# we must use this to support breakpoint resume syncing. 
-# TODO: support other storage, like etcd. 
-data_dir = "./var"
+# we must use this to support breakpoint resume syncing.
+# TODO: support other storage, like etcd.
+data_dir = "/data/go-es-data"
 
 # Inner Http status address
 stat_addr = "127.0.0.1:12800"
 
-# pseudo server id like a slave 
+# pseudo server id like a slave
 server_id = 1001
 
 # mysql or mariadb
@@ -41,17 +41,17 @@ flush_bulk_time = "200ms"
 
 # MySQL data source
 [[source]]
-schema = "test"
+schema = "base"
+tables = ["member", "order_header", "member_points_item"]
 
-# Only below tables will be synced into Elasticsearch.
-# "t_[0-9]{4}" is a wildcard table format, you can use it if you have many sub tables, like table_0000 - table_1023
-# I don't think it is necessary to sync all tables in a database.
-tables = ["t", "t_[0-9]{4}", "tfield", "tfilter"]
+[[source]]
+schema = "wxy"
+tables = ["member", "order_header", "member_points_item"]
 
 # Below is for special rule mapping
 
 # Very simple example
-# 
+#
 # desc t;
 # +-------+--------------+------+-----+---------+-------+
 # | Field | Type         | Null | Key | Default | Extra |
@@ -59,85 +59,42 @@ tables = ["t", "t_[0-9]{4}", "tfield", "tfilter"]
 # | id    | int(11)      | NO   | PRI | NULL    |       |
 # | name  | varchar(256) | YES  |     | NULL    |       |
 # +-------+--------------+------+-----+---------+-------+
-# 
+#
 # The table `t` will be synced to ES index `test` and type `t`.
 [[rule]]
-schema = "test"
-table = "t"
-index = "test"
-type = "t"
+schema = "base"
+table = "member"
+index = "data"
+type = "member"
+filter = ["member_id", "channel_id", "grade_id", "member_code", "email", "mobile", "member_name", "gender", "birthday", "register_time", "status_id", "system_id"]
+id = ["system_id", "member_id"]
+extension = "system_id:1"
 
-# Wildcard table rule, the wildcard table must be in source tables 
-# All tables which match the wildcard format will be synced to ES index `test` and type `t`.
-# In this example, all tables must have same schema with above table `t`;
 [[rule]]
-schema = "test"
-table = "t_[0-9]{4}"
-index = "test"
-type = "t"
+schema = "wxy"
+table = "member"
+index = "data"
+type = "member"
+filter = ["member_id", "channel_id", "grade_id", "member_code", "email", "mobile", "member_name", "gender", "birthday", "register_time", "status_id", "system_id"]
+id = ["system_id", "member_id"]
+extension = "system_id:1"
 
-# Simple field rule 
-#
-# desc tfield;
-# +----------+--------------+------+-----+---------+-------+
-# | Field    | Type         | Null | Key | Default | Extra |
-# +----------+--------------+------+-----+---------+-------+
-# | id       | int(11)      | NO   | PRI | NULL    |       |
-# | tags     | varchar(256) | YES  |     | NULL    |       |
-# | keywords | varchar(256) | YES  |     | NULL    |       |
-# +----------+--------------+------+-----+---------+-------+
-#
 [[rule]]
-schema = "test"
-table = "tfield"
-index = "test"
-type = "tfield"
+schema = "base"
+table = "member_points_item"
+index = "data"
+type = "points"
+parent = ["system_id", "member_id"]
+filter = ["order_id", "order_code", "external_id", "member_id", "channel_id", "store_id", "store_code", "order_date", "order_amount", "pay_amount", "used_amount", "create_time", "status_id", "system_id"]
+id = ["system_id", "member_id"]
+extension = "system_id:2"
 
-[rule.field]
-# Map column `id` to ES field `es_id`
-id="es_id"
-# Map column `tags` to ES field `es_tags` with array type 
-tags="es_tags,list"
-# Map column `keywords` to ES with array type
-keywords=",list"
-
-# Filter rule 
-#
-# desc tfilter;
-# +-------+--------------+------+-----+---------+-------+
-# | Field | Type         | Null | Key | Default | Extra |
-# +-------+--------------+------+-----+---------+-------+
-# | id    | int(11)      | NO   | PRI | NULL    |       |
-# | c1    | int(11)      | YES  |     | 0       |       |
-# | c2    | int(11)      | YES  |     | 0       |       |
-# | name  | varchar(256) | YES  |     | NULL    |       |
-# +-------+--------------+------+-----+---------+-------+
-#
 [[rule]]
-schema = "test"
-table = "tfilter"
-index = "test"
-type = "tfilter"
-
-# Only sync following columns
-filter = ["id", "name"]
-
-# id rule
-#
-# desc tid_[0-9]{4};
-# +----------+--------------+------+-----+---------+-------+
-# | Field    | Type         | Null | Key | Default | Extra |
-# +----------+--------------+------+-----+---------+-------+
-# | id       | int(11)      | NO   | PRI | NULL    |       |
-# | tag      | varchar(256) | YES  |     | NULL    |       |
-# | desc     | varchar(256) | YES  |     | NULL    |       |
-# +----------+--------------+------+-----+---------+-------+
-#
-[[rule]]
-schema = "test"
-table = "tid_[0-9]{4}"
-index = "test"
-type = "t"
-# The es doc's id will be `id`:`tag`
-# It is useful for merge muliple table into one type while theses tables have same PK 
-id = ["id", "tag"]
+schema = "wxy"
+table = "member_points_item"
+index = "data"
+type = "points"
+parent = ["system_id", "member_id"]
+filter = ["order_id", "order_code", "external_id", "member_id", "channel_id", "store_id", "store_code", "order_date", "order_amount", "pay_amount", "used_amount", "create_time", "status_id", "system_id"]
+id = ["system_id", "member_id"]
+extension = "system_id:2"
