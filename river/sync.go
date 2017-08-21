@@ -356,6 +356,10 @@ func (r *River) makeInsertReqData(req *elastic.BulkRequest, rule *Rule, values [
 			req.Data[c.Name] = r.makeReqColumnData(&c, values[i])
 		}
 	}
+	// add
+	for _, cloumn := range rule.Extensions {
+		req.Data[cloumn] = rule.Extensions[cloumn]
+	}
 }
 
 func (r *River) makeUpdateReqData(req *elastic.BulkRequest, rule *Rule,
@@ -403,8 +407,8 @@ func (r *River) makeUpdateReqData(req *elastic.BulkRequest, rule *Rule,
 // Else get the ID's column in one row and format them into a string
 func (r *River) getDocID(rule *Rule, row []interface{}) (string, error) {
 	var (
-  		ids []interface{}
-  		err error 
+		ids []interface{}
+		err error
 	)
 	if rule.ID == nil {
 		ids, err = canal.GetPKValues(rule.TableInfo, row)
@@ -470,7 +474,6 @@ func (r *River) getParentIDs(rule *Rule, row []interface{}, columnNames []string
 	return r.getValue(&vals, "The %ds parentId value is nil")
 }
 
-
 func (r *River) getParentID(rule *Rule, row []interface{}, columnName string) (string, error) {
 	if val, ok := rule.Extensions[columnName]; ok {
 		return val, nil
@@ -490,7 +493,7 @@ func (r *River) doBulk(reqs []*elastic.BulkRequest) error {
 	if resp, err := r.es.Bulk(reqs); err != nil {
 		log.Errorf("sync docs err %v after binlog %s", err, r.canal.SyncedPosition())
 		return errors.Trace(err)
-	} else if resp.Code / 100 == 2 || resp.Errors {
+	} else if resp.Code/100 == 2 || resp.Errors {
 		for i := 0; i < len(resp.Items); i++ {
 			for action, item := range resp.Items[i] {
 				if len(item.Error) > 0 {

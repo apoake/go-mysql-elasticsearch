@@ -41,7 +41,7 @@ flush_bulk_time = "200ms"
 
 # MySQL data source
 [[source]]
-schema = "base"
+schema = "beta"
 tables = ["member", "order_header"]
 
 [[source]]
@@ -62,39 +62,39 @@ tables = ["member", "order_header"]
 #
 # The table `t` will be synced to ES index `test` and type `t`.
 [[rule]]
-schema = "base"
+schema = "beta"
 table = "member"
 index = "data"
 type = "member"
-filter = ["member_id", "channel_id", "grade_id", "member_code", "email", "mobile", "member_name", "gender", "birthday", "register_time", "status_id", "system_id"]
-id = ["system_id", "member_id"]
-extension = "system_id:1"
+filter = ["MEMBER_ID", "CHANNEL_ID", "GRADE_ID", "MEMBER_CODE", "EMAIL", "MOBILE", "MEMBER_NAME", "GENDER", "BIRTHDAY", "REGISTER_TIME", "STATUS_ID", "SYSTEM_ID"]
+id = ["SYSTEM_ID", "MEMBER_ID"]
+extension = "SYSTEM_ID:dq"
 
 [[rule]]
 schema = "wxy"
 table = "member"
 index = "data"
 type = "member"
-filter = ["member_id", "channel_id", "grade_id", "member_code", "email", "mobile", "member_name", "gender", "birthday", "register_time", "status_id", "system_id"]
-id = ["system_id", "member_id"]
-extension = "system_id:1"
+filter = ["MEMBER_ID", "CHANNEL_ID", "GRADE_ID", "MEMBER_CODE", "EMAIL", "MOBILE", "MEMBER_NAME", "GENDER", "BIRTHDAY", "REGISTER_TIME", "STATUS_ID", "SYSTEM_ID"]
+id = ["SYSTEM_ID", "MEMBER_ID"]
+extension = "SYSTEM_ID:wxy"
 
 [[rule]]
-schema = "base"
+schema = "beta"
 table = "order_header"
 index = "data"
-type = "points"
-parent = ["system_id", "member_id"]
-filter = ["order_id", "order_code", "external_id", "member_id", "channel_id", "store_id", "store_code", "order_date", "order_amount", "pay_amount", "used_amount", "create_time", "status_id", "system_id"]
-id = ["system_id", "member_id"]
-extension = "system_id:2"
+type = "order"
+parent = ["SYSTEM_ID", "MEMBER_ID"]
+filter = ["ORDER_ID", "ORDER_CODE", "EXTERNAL_ID", "MEMBER_ID", "CHANNEL_ID", "STORE_ID", "STORE_CODE", "ORDER_DATE", "ORDER_AMOUNT", "PAY_AMOUNT", "USED_POINTS", "CREATE_TIME", "STATUS_ID", "SYSTEM_ID"]
+id = ["SYSTEM_ID", "ORDER_ID"]
+extension = "SYSTEM_ID:dq"
 
 [[rule]]
 schema = "wxy"
 table = "order_header"
 index = "data"
-type = "points"
-parent = ["system_id", "member_id"]
-filter = ["order_id", "order_code", "external_id", "member_id", "channel_id", "store_id", "store_code", "order_date", "order_amount", "pay_amount", "used_amount", "create_time", "status_id", "system_id"]
-id = ["system_id", "member_id"]
-extension = "system_id:2"
+type = "order"
+parent = ["SYSTEM_ID", "MEMBER_ID"]
+filter = ["ORDER_ID", "ORDER_CODE", "EXTERNAL_ID", "MEMBER_ID", "CHANNEL_ID", "STORE_ID", "STORE_CODE", "ORDER_DATE", "ORDER_AMOUNT", "PAY_AMOUNT", "USED_POINTS", "CREATE_TIME", "STATUS_ID", "SYSTEM_ID"]
+id = ["SYSTEM_ID", "ORDER_ID"]
+extension = "SYSTEM_ID:wxy"
