@@ -42,11 +42,11 @@ flush_bulk_time = "200ms"
 # MySQL data source
 [[source]]
 schema = "base"
-tables = ["member", "order_header", "member_points_item"]
+tables = ["member", "order_header"]
 
 [[source]]
 schema = "wxy"
-tables = ["member", "order_header", "member_points_item"]
+tables = ["member", "order_header"]
 
 # Below is for special rule mapping
 
@@ -81,7 +81,7 @@ extension = "system_id:1"
 
 [[rule]]
 schema = "base"
-table = "member_points_item"
+table = "order_header"
 index = "data"
 type = "points"
 parent = ["system_id", "member_id"]
@@ -91,7 +91,7 @@ extension = "system_id:2"
 
 [[rule]]
 schema = "wxy"
-table = "member_points_item"
+table = "order_header"
 index = "data"
 type = "points"
 parent = ["system_id", "member_id"]

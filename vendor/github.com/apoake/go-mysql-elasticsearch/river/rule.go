@@ -2,7 +2,6 @@ package river
 
 import (
 	"github.com/siddontang/go-mysql/schema"
-	"strings"
 )
 
 // If you want to sync MySQL data into elasticsearch, you must set a rule to let use know how to do it.
@@ -13,7 +12,7 @@ type Rule struct {
 	Table  string `toml:"table"`
 	Index  string `toml:"index"`
 	Type   string `toml:"type"`
-	Parent []string `toml:"parent"`
+	Parent string `toml:"parent"`
 	ID []string `toml:"id"`
 
 	// Default, a MySQL table field name is mapped to Elasticsearch field name.
@@ -26,9 +25,6 @@ type Rule struct {
 
 	//only MySQL fields in fileter will be synced , default sync all fields
 	Fileter []string `toml:"filter"`
-
-	Extension	string `toml:"extension"`
-	Extensions 	map[string]string
 }
 
 func newDefaultRule(schema string, table string) *Rule {
@@ -39,7 +35,7 @@ func newDefaultRule(schema string, table string) *Rule {
 	r.Index = table
 	r.Type = table
 	r.FieldMapping = make(map[string]string)
-	r.Extensions = make(map[string]string)
+
 	return r
 }
 
@@ -56,23 +52,7 @@ func (r *Rule) prepare() error {
 		r.Type = r.Index
 	}
 
-	r.initExtensions()
-
 	return nil
-}
-
-// add
-func (r *Rule) initExtensions() {
-	if r.Extension != "" {
-		strs := strings.Split(r.Extension, ",")
-		for _, str := range  strs {
-			if len(str) == 0 {
-				continue
-			}
-			subStrs := strings.Split(str, ":")
-			r.Extensions[strings.TrimSpace(subStrs[0])] = strings.TrimSpace(subStrs[1])
-		}
-	}
 }
 
 func (r *Rule) CheckFilter(field string) bool {

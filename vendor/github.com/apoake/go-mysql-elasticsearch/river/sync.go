@@ -10,7 +10,7 @@ import (
 
 	"github.com/juju/errors"
 	"github.com/ngaut/log"
-	"./../elastic"
+	"github.com/siddontang/go-mysql-elasticsearch/elastic"
 	"github.com/siddontang/go-mysql/canal"
 	"github.com/siddontang/go-mysql/mysql"
 	"github.com/siddontang/go-mysql/replication"
@@ -56,6 +56,8 @@ func (h *eventHandler) OnXID(nextPos mysql.Position) error {
 	h.r.syncCh <- posSaver{nextPos, false}
 	return h.r.ctx.Err()
 }
+
+func (h *eventHandler) OnGTID(mysql.GTIDSet) error { return nil }
 
 func (h *eventHandler) OnRow(e *canal.RowsEvent) error {
 	rule, ok := h.r.rules[ruleKey(e.Table.Schema, e.Table.Name)]
@@ -412,10 +414,6 @@ func (r *River) getDocID(rule *Rule, row []interface{}) (string, error) {
 	} else {
 		ids = make([]interface{}, 0, len(rule.ID))
 		for _, column := range rule.ID {
-			if val, ok := rule.Extensions[column]; ok {
-				ids = append(ids, val)
-				continue
-			}
 			value, err := canal.GetColumnValue(rule.TableInfo, column, row)
 			if err != nil {
 				return "", err
@@ -424,29 +422,12 @@ func (r *River) getDocID(rule *Rule, row []interface{}) (string, error) {
 		}
 	}
 
-	return r.getValue(&ids, "The %ds id or PK value is nil")
-	//var buf bytes.Buffer
-	//
-	//sep := ""
-	//for i, value := range ids {
-	//	if value == nil {
-	//		return "", errors.Errorf("The %ds id or PK value is nil", i)
-	//	}
-	//
-	//	buf.WriteString(fmt.Sprintf("%s%v", sep, value))
-	//	sep = ":"
-	//}
-	//
-	//return buf.String(), nil
-}
-
-func (r *River) getValue(vals *[]interface{}, errStr string) (string, error) {
 	var buf bytes.Buffer
 
 	sep := ""
-	for i, value := range *vals {
+	for i, value := range ids {
 		if value == nil {
-			return "", errors.Errorf(errStr, i)
+			return "", errors.Errorf("The %ds id or PK value is nil", i)
 		}
 
 		buf.WriteString(fmt.Sprintf("%s%v", sep, value))
@@ -456,23 +437,12 @@ func (r *River) getValue(vals *[]interface{}, errStr string) (string, error) {
 	return buf.String(), nil
 }
 
-func (r *River) getParentIDs(rule *Rule, row []interface{}, columnNames []string) (string, error) {
-	vals := make([]interface{}, 0, len(columnNames))
-	for _, cloumn := range columnNames {
-		vals = append(vals, r.getParentID(rule, row, cloumn))
-	}
-	return r.getValue(&vals, "The %ds parentId value is nil")
-}
-
-
 func (r *River) getParentID(rule *Rule, row []interface{}, columnName string) (string, error) {
-	if val, ok := rule.Extensions[columnName]; ok {
-		return val, nul
-	}
 	index := rule.TableInfo.FindColumn(columnName)
 	if index < 0 {
 		return "", errors.Errorf("parent id not found %s(%s)", rule.TableInfo.Name, columnName)
 	}
+
 	return fmt.Sprint(row[index]), nil
 }
 

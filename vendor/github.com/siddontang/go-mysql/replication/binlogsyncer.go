@@ -13,6 +13,7 @@ import (
 
 	"github.com/juju/errors"
 	"github.com/ngaut/log"
+	"github.com/satori/go.uuid"
 	"github.com/siddontang/go-mysql/client"
 	. "github.com/siddontang/go-mysql/mysql"
 )
@@ -77,6 +78,10 @@ type BinlogSyncer struct {
 
 	nextPos Position
 
+	useGTID bool
+
+	gset GTIDSet
+
 	running bool
 
 	ctx    context.Context
@@ -98,6 +103,7 @@ func NewBinlogSyncer(cfg *BinlogSyncerConfig) *BinlogSyncer {
 	b.parser = NewBinlogParser()
 	b.parser.SetRawMode(b.cfg.RawModeEnabled)
 	b.parser.SetParseTime(b.cfg.ParseTime)
+	b.useGTID = false
 	b.running = false
 	b.ctx, b.cancel = context.WithCancel(context.Background())
 
@@ -285,6 +291,9 @@ func (b *BinlogSyncer) StartSync(pos Position) (*BinlogStreamer, error) {
 func (b *BinlogSyncer) StartSyncGTID(gset GTIDSet) (*BinlogStreamer, error) {
 	log.Infof("begin to sync binlog from GTID %s", gset)
 
+	b.useGTID = true
+	b.gset = gset
+
 	b.m.Lock()
 	defer b.m.Unlock()
 
@@ -311,7 +320,7 @@ func (b *BinlogSyncer) StartSyncGTID(gset GTIDSet) (*BinlogStreamer, error) {
 	return b.startDumpStream(), nil
 }
 
-func (b *BinlogSyncer) writeBinglogDumpCommand(p Position) error {
+func (b *BinlogSyncer) writeBinlogDumpCommand(p Position) error {
 	b.c.ResetSequence()
 
 	data := make([]byte, 4+1+4+2+4+len(p.Name))
@@ -391,7 +400,7 @@ func (b *BinlogSyncer) writeBinlogDumpMariadbGTIDCommand(gset GTIDSet) error {
 	}
 
 	// Since we use @slave_connect_state, the file and position here are ignored.
-	return b.writeBinglogDumpCommand(Position{"", 0})
+	return b.writeBinlogDumpCommand(Position{"", 0})
 }
 
 // localHostname returns the hostname that register slave would register as.
@@ -476,11 +485,19 @@ func (b *BinlogSyncer) retrySync() error {
 	b.m.Lock()
 	defer b.m.Unlock()
 
-	log.Infof("begin to re-sync from %s", b.nextPos)
-
 	b.parser.Reset()
-	if err := b.prepareSyncPos(b.nextPos); err != nil {
-		return errors.Trace(err)
+
+	if b.useGTID {
+		log.Infof("begin to re-sync from %s", b.gset.String())
+		if err := b.prepareSyncGTID(b.gset); err != nil {
+			return errors.Trace(err)
+		}
+
+	} else {
+		log.Infof("begin to re-sync from %s", b.nextPos)
+		if err := b.prepareSyncPos(b.nextPos); err != nil {
+			return errors.Trace(err)
+		}
 	}
 
 	return nil
@@ -496,10 +513,30 @@ func (b *BinlogSyncer) prepareSyncPos(pos Position) error {
 		return errors.Trace(err)
 	}
 
-	if err := b.writeBinglogDumpCommand(pos); err != nil {
+	if err := b.writeBinlogDumpCommand(pos); err != nil {
 		return errors.Trace(err)
 	}
 
+	return nil
+}
+
+func (b *BinlogSyncer) prepareSyncGTID(gset GTIDSet) error {
+	var err error
+
+	if err = b.prepare(); err != nil {
+	    return errors.Trace(err)
+	}
+
+	if b.cfg.Flavor != MariaDBFlavor {
+		// default use MySQL
+		err = b.writeBinlogDumpMysqlGTIDCommand(gset)
+	} else {
+		err = b.writeBinlogDumpMariadbGTIDCommand(gset)
+	}
+
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -517,8 +554,8 @@ func (b *BinlogSyncer) onStream(s *BinlogStreamer) {
 			log.Error(err)
 
 			// we meet connection error, should re-connect again with
-			// last nextPos we got.
-			if len(b.nextPos.Name) == 0 {
+			// last nextPos or nextGTID we got.
+			if len(b.nextPos.Name) == 0 && b.gset == nil {
 				// we can't get the correct position, close.
 				s.closeWithError(err)
 				return
@@ -588,11 +625,33 @@ func (b *BinlogSyncer) parseEvent(s *BinlogStreamer, data []byte) error {
 		// Some events like FormatDescriptionEvent return 0, ignore.
 		b.nextPos.Pos = e.Header.LogPos
 	}
-
-	if re, ok := e.Event.(*RotateEvent); ok {
-		b.nextPos.Name = string(re.NextLogName)
-		b.nextPos.Pos = uint32(re.Position)
+	switch event := e.Event.(type) {
+	case *RotateEvent:
+		b.nextPos.Name = string(event.NextLogName)
+		b.nextPos.Pos = uint32(event.Position)
 		log.Infof("rotate to %s", b.nextPos)
+	case *GTIDEvent:
+		if !b.useGTID {
+		    break
+		}
+		u, _ := uuid.FromBytes(event.SID)
+		err := b.gset.Update(fmt.Sprintf("%s:%d", u.String(), event.GNO))
+		if err != nil {
+			return errors.Trace(err)
+		}
+	case *MariadbGTIDEvent:
+		if !b.useGTID {
+		    break
+		}
+		GTID := event.GTID
+		err := b.gset.Update(fmt.Sprintf("%d-%d-%d", GTID.DomainID, GTID.ServerID, GTID.SequenceNumber))
+		if err != nil {
+			return errors.Trace(err)
+		}
+	case *XIDEvent:
+		event.GSet = b.getGtidSet()
+	case *QueryEvent:
+		event.GSet = b.getGtidSet()
 	}
 
 	needStop := false
@@ -614,4 +673,20 @@ func (b *BinlogSyncer) parseEvent(s *BinlogStreamer, data []byte) error {
 	}
 
 	return nil
+}
+
+func (b *BinlogSyncer) getGtidSet() GTIDSet {
+    	var gtidSet GTIDSet
+
+    	if !b.useGTID {
+		return nil
+    	}
+
+    	if b.cfg.Flavor != MariaDBFlavor {
+		gtidSet, _ = ParseGTIDSet(MySQLFlavor, b.gset.String())
+    	} else {
+		gtidSet, _ = ParseGTIDSet(MariaDBFlavor, b.gset.String())
+    	}
+
+    	return gtidSet
 }
