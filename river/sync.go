@@ -10,7 +10,7 @@ import (
 
 	"github.com/juju/errors"
 	"github.com/ngaut/log"
-	"./../elastic"
+	"github.com/apoake/go-mysql-elasticsearch/elastic"
 	"github.com/siddontang/go-mysql/canal"
 	"github.com/siddontang/go-mysql/mysql"
 	"github.com/siddontang/go-mysql/replication"
@@ -167,7 +167,7 @@ func (r *River) makeRequest(rule *Rule, action string, rows [][]interface{}) ([]
 
 		parentID := ""
 		if len(rule.Parent) > 0 {
-			if parentID, err = r.getParentID(rule, values, rule.Parent); err != nil {
+			if parentID, err = r.getParentIDs(rule, values, rule.Parent); err != nil {
 				return nil, errors.Trace(err)
 			}
 		}
@@ -217,10 +217,10 @@ func (r *River) makeUpdateRequest(rule *Rule, rows [][]interface{}) ([]*elastic.
 
 		beforeParentID, afterParentID := "", ""
 		if len(rule.Parent) > 0 {
-			if beforeParentID, err = r.getParentID(rule, rows[i], rule.Parent); err != nil {
+			if beforeParentID, err = r.getParentIDs(rule, rows[i], rule.Parent); err != nil {
 				return nil, errors.Trace(err)
 			}
-			if afterParentID, err = r.getParentID(rule, rows[i+1], rule.Parent); err != nil {
+			if afterParentID, err = r.getParentIDs(rule, rows[i+1], rule.Parent); err != nil {
 				return nil, errors.Trace(err)
 			}
 		}
@@ -467,7 +467,7 @@ func (r *River) getParentIDs(rule *Rule, row []interface{}, columnNames []string
 
 func (r *River) getParentID(rule *Rule, row []interface{}, columnName string) (string, error) {
 	if val, ok := rule.Extensions[columnName]; ok {
-		return val, nul
+		return val, nil
 	}
 	index := rule.TableInfo.FindColumn(columnName)
 	if index < 0 {
