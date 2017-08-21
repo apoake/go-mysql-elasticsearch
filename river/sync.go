@@ -36,6 +36,8 @@ type eventHandler struct {
 	r *River
 }
 
+func (h *eventHandler) OnGTID(mysql.GTIDSet) error { return nil }
+
 func (h *eventHandler) OnRotate(e *replication.RotateEvent) error {
 	pos := mysql.Position{
 		string(e.NextLogName),
