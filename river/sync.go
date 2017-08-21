@@ -357,8 +357,8 @@ func (r *River) makeInsertReqData(req *elastic.BulkRequest, rule *Rule, values [
 		}
 	}
 	// add
-	for _, cloumn := range rule.Extensions {
-		req.Data[cloumn] = rule.Extensions[cloumn]
+	for key, value := range rule.Extensions {
+		req.Data[key] = rule.Extensions[value]
 	}
 }
 

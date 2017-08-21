@@ -1,6 +1,6 @@
 # MySQL address, user and password
 # user must have replication privilege in MySQL.
-my_addr = "office:3306"
+my_addr = "seltek:3306"
 my_user = "root"
 my_pass = "root"
 my_charset = "utf8"
