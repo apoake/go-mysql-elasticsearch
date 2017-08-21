@@ -1,4 +1,4 @@
-package: github.com/siddontang/go-mysql-elasticsearch
+package: github.com/apoake/go-mysql-elasticsearch
 import:
 - package: github.com/BurntSushi/toml
   version: 056c9bc7be7190eaa7715723883caffa5f8fa3e4

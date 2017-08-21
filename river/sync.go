@@ -459,7 +459,11 @@ func (r *River) getValue(vals *[]interface{}, errStr string) (string, error) {
 func (r *River) getParentIDs(rule *Rule, row []interface{}, columnNames []string) (string, error) {
 	vals := make([]interface{}, 0, len(columnNames))
 	for _, cloumn := range columnNames {
-		vals = append(vals, r.getParentID(rule, row, cloumn))
+		if val, err := r.getParentID(rule, row, cloumn); err != nil {
+			return "", err
+		} else {
+			vals = append(vals, val)
+		}
 	}
 	return r.getValue(&vals, "The %ds parentId value is nil")
 }
