@@ -39,7 +39,6 @@ func newDefaultRule(schema string, table string) *Rule {
 	r.Index = table
 	r.Type = table
 	r.FieldMapping = make(map[string]string)
-	r.Extensions = make(map[string]string)
 	return r
 }
 
@@ -63,6 +62,7 @@ func (r *Rule) prepare() error {
 
 // add
 func (r *Rule) initExtensions() {
+	r.Extensions = make(map[string]string)
 	if r.Extension != "" {
 		strs := strings.Split(r.Extension, ",")
 		for _, str := range  strs {
