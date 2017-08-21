@@ -1,4 +1,4 @@
-package main
+package go_mysql_elasticsearch
 
 import (
 	"flag"
