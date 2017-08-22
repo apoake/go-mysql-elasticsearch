@@ -36,6 +36,7 @@ func (c *crons) start() {
 	}
 	c.isSleep = false
 	c.Start()
+	c.suspend()
 }
 
 func (c *crons) suspend() {
