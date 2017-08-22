@@ -116,7 +116,7 @@ func (r *River) syncLoop() {
 		needFlush := false
 		needSavePos := false
 		// 确认是否可运行
-		canRun(r)
+		r.cronn.canRun()
 
 		select {
 		case v := <-r.syncCh:

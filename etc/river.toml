@@ -40,8 +40,8 @@ bulk_size = 128
 flush_bulk_time = "200ms"
 
 is_corn = true
-start_corn = "0 48 16 * * *"
-stop_corn = "0 50 16 * * *"
+start_corn = "0 50 16 * * *"
+stop_corn = "0 52 16 * * *"
 
 # MySQL data source
 [[source]]
