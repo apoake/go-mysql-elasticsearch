@@ -1,6 +1,6 @@
 # MySQL address, user and password
 # user must have replication privilege in MySQL.
-my_addr = "seltek:3306"
+my_addr = "office:3306"
 my_user = "root"
 my_pass = "root"
 my_charset = "utf8"
@@ -38,6 +38,10 @@ bulk_size = 128
 
 # force flush the pending requests if we don't have enough items >= bulk_size
 flush_bulk_time = "200ms"
+
+is_corn = true
+start_corn = "0 30 12 * * *"
+stop_corn = "0 30 7 * * *"
 
 # MySQL data source
 [[source]]

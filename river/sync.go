@@ -115,6 +115,8 @@ func (r *River) syncLoop() {
 	for {
 		needFlush := false
 		needSavePos := false
+		// 确认是否可运行
+		canRun(r)
 
 		select {
 		case v := <-r.syncCh:

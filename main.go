@@ -81,6 +81,7 @@ func main() {
 		println(errors.ErrorStack(err))
 		return
 	}
+	// add cron
 
 	r.Start()
 

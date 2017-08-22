@@ -34,17 +34,23 @@ type River struct {
 	master *masterInfo
 
 	syncCh chan interface{}
+
+	cronn *crons
 }
 
 func NewRiver(c *Config) (*River, error) {
 	r := new(River)
-
 	r.c = c
 	r.rules = make(map[string]*Rule)
 	r.syncCh = make(chan interface{}, 4096)
 	r.ctx, r.cancel = context.WithCancel(context.Background())
 
 	var err error
+	r.cronn, err = NewCron(r)
+	if err != nil {
+		return nil, errors.Trace(err)
+	}
+
 	if r.master, err = loadMasterInfo(c.DataDir); err != nil {
 		return nil, errors.Trace(err)
 	}
@@ -260,6 +266,7 @@ func (r *River) Start() error {
 		return errors.Trace(err)
 	}
 
+	r.cronn.start()
 	return nil
 }
 
@@ -277,4 +284,6 @@ func (r *River) Close() {
 	r.master.Close()
 
 	r.wg.Wait()
+
+	r.cronn.stop()
 }

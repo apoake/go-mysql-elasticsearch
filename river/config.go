@@ -39,6 +39,10 @@ type Config struct {
 	BulkSize int `toml:"bulk_size"`
 
 	FlushBulkTime TomlDuration `toml:"flush_bulk_time"`
+
+	IsCron		bool	`toml:"is_cron"`
+	StartJob	 string `toml:"start_corn"`
+	StopJob		 string	`toml:"stop_corn"`
 }
 
 func NewConfigWithFile(name string) (*Config, error) {
