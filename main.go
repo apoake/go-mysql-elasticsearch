@@ -9,7 +9,7 @@ import (
 
 	"github.com/juju/errors"
 	"github.com/ngaut/log"
-	"github.com/apoake/go-mysql-elasticsearch/river"
+	"go-mysql-elasticsearch/river"
 )
 
 var configFile = flag.String("config", "./etc/river.toml", "go-mysql-elasticsearch config file")

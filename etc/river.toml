@@ -39,9 +39,9 @@ bulk_size = 128
 # force flush the pending requests if we don't have enough items >= bulk_size
 flush_bulk_time = "200ms"
 
-is_corn = true
-start_corn = "0 50 16 * * *"
-stop_corn = "0 52 16 * * *"
+is_cron = true
+start_cron = "0 * 20 * * *"
+stop_cron = "30 * 20 * * *"
 
 # MySQL data source
 [[source]]
