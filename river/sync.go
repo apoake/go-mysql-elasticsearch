@@ -10,7 +10,7 @@ import (
 
 	"github.com/juju/errors"
 	"github.com/ngaut/log"
-	"go-mysql-elasticsearch/elastic"
+	"github.com/apoake/go-mysql-elasticsearch/elastic"
 	"github.com/siddontang/go-mysql/canal"
 	"github.com/siddontang/go-mysql/mysql"
 	"github.com/siddontang/go-mysql/replication"

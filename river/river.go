@@ -7,7 +7,7 @@ import (
 
 	"github.com/juju/errors"
 	"github.com/ngaut/log"
-	"go-mysql-elasticsearch/elastic"
+	"github.com/apoake/go-mysql-elasticsearch/elastic"
 	"github.com/siddontang/go-mysql/canal"
 	"golang.org/x/net/context"
 )
