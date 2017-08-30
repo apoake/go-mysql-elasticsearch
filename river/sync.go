@@ -117,6 +117,7 @@ func (r *River) syncLoop() {
 		needSavePos := false
 		// 确认是否可运行
 		r.cronn.canRun()
+		println("run-------")
 
 		select {
 		case v := <-r.syncCh:
@@ -138,7 +139,7 @@ func (r *River) syncLoop() {
 		case <-r.ctx.Done():
 			return
 		}
-
+		fmt.Printf("needFlush[%d], needSavePos[%d]\n", needFlush, needSavePos)
 		if needFlush {
 			// TODO: retry some times?
 			if err := r.doBulk(reqs); err != nil {
@@ -147,6 +148,7 @@ func (r *River) syncLoop() {
 				return
 			}
 			reqs = reqs[0:0]
+			fmt.Printf("%v\n", reqs)
 		}
 
 		if needSavePos {
@@ -155,6 +157,7 @@ func (r *River) syncLoop() {
 				r.cancel()
 				return
 			}
+			fmt.Printf("pos[%v]\n", pos)
 		}
 	}
 }
