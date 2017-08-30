@@ -33,6 +33,7 @@ func NewCron(r *River) (*crons, error) {
 }
 
 func (c *crons) start() {
+	fmt.Printf("%v\n", c.c.IsCron)
 	if !c.c.IsCron {
 		return
 	}
@@ -66,6 +67,8 @@ func (c *crons) restart() {
 }
 
 func (c *crons) canRun() {
+	tt := !c.c.IsCron || !c.isSleep
+	fmt.Printf("can run: %d\n", tt)
 	if !c.c.IsCron || !c.isSleep {
 		return
 	}
