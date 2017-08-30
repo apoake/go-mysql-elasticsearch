@@ -283,7 +283,7 @@ func (r *River) Close() {
 
 	r.master.Close()
 
-	r.wg.Wait()
-
 	r.cronn.stop()
+
+	r.wg.Wait()
 }
