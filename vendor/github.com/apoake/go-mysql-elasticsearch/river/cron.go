@@ -43,6 +43,7 @@ func (c *crons) start() {
 
 func (c *crons) status(method string) {
 	fmt.Printf("method[%s] --> isSleep: %t", method, c.isSleep)
+	fmt.Println("-----------------------------")
 }
 
 func (c *crons) suspend() {
@@ -73,8 +74,11 @@ func (c *crons) canRun() {
 }
 
 func (c *crons) stop() {
-	if !c.c.IsCron {
+	if !c.c.IsCron || !c.isSleep {
 		return
+	}
+	if c.isSleep {
+		c.cronCh <- false
 	}
 	c.Stop()
 	fmt.Println("do stop")

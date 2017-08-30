@@ -56,7 +56,6 @@ func (c *crons) suspend() {
 }
 
 func (c *crons) restart() {
-	println("------------------5------------")
 	c.status("restart")
 	if !c.c.IsCron || !c.isSleep {
 		return
@@ -67,8 +66,6 @@ func (c *crons) restart() {
 }
 
 func (c *crons) canRun() {
-	tt := !c.c.IsCron || !c.isSleep
-	fmt.Printf("can run: %d\n", tt)
 	if !c.c.IsCron || !c.isSleep {
 		return
 	}
@@ -77,8 +74,11 @@ func (c *crons) canRun() {
 }
 
 func (c *crons) stop() {
-	if !c.c.IsCron {
+	if !c.c.IsCron || !c.isSleep {
 		return
+	}
+	if c.isSleep {
+		c.cronCh <- false
 	}
 	c.Stop()
 	fmt.Println("do stop")
