@@ -41,8 +41,8 @@ type Config struct {
 	FlushBulkTime TomlDuration `toml:"flush_bulk_time"`
 
 	IsCron		bool	`toml:"is_cron"`
-	StartJob	 string `toml:"start_corn"`
-	StopJob		 string	`toml:"stop_corn"`
+	StartJob	 string `toml:"start_cron"`
+	StopJob		 string	`toml:"stop_cron"`
 }
 
 func NewConfigWithFile(name string) (*Config, error) {

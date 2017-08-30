@@ -1,15 +1,19 @@
 # MySQL address, user and password
 # user must have replication privilege in MySQL.
-my_addr = "seltek:3306"
+#my_addr = "120.26.221.15:3306"
+#my_user = "root"
+#my_pass = "xr0XTh8Z"
+#my_charset = "utf8"
+my_addr = "192.168.110.188:3306"
 my_user = "root"
 my_pass = "root"
 my_charset = "utf8"
 
 # Elasticsearch address
-es_addr = "127.0.0.1:9200"
+es_addr = "139.196.6.126:80"
 # Elasticsearch user and password, maybe set by shield, nginx, or x-pack
-es_user = ""
-es_pass = ""
+es_user = "elastic"
+es_pass = "W*LAxoo^^Io5"
 
 # Path to store data, like master.info, if not set or empty,
 # we must use this to support breakpoint resume syncing.
@@ -48,9 +52,9 @@ stop_cron = "30 * 20 * * *"
 schema = "beta"
 tables = ["member", "order_header", "member_points_item", "order_coupon", "coupon_instance", "member_account"]
 
-[[source]]
-schema = "wxy"
-tables = ["member", "order_header", "member_points_item", "order_coupon", "coupon_instance", "member_account"]
+#[[source]]
+#schema = "wxy"
+#tables = ["member", "order_header", "member_points_item", "order_coupon", "coupon_instance", "member_account"]
 
 # Below is for special rule mapping
 
@@ -124,61 +128,61 @@ filter = ["MEMBER_ACCOUNT_ID", "MEMBER_ID", "ACCOUNT_BALANCE", "POINTS_BALANCE",
 id = ["SYSTEM_ID", "MEMBER_ACCOUNT_ID"]
 extension = "SYSTEM_ID:dq"
 
-[[rule]]
-schema = "wxy"
-table = "member"
-index = "data"
-type = "member"
-filter = ["MEMBER_ID", "CHANNEL_ID", "GRADE_ID", "MEMBER_CODE", "EMAIL", "MOBILE", "MEMBER_NAME", "GENDER", "BIRTHDAY", "REGISTER_TIME", "STATUS_ID", "SYSTEM_ID"]
-id = ["SYSTEM_ID", "MEMBER_ID"]
-extension = "SYSTEM_ID:wxy"
-
-[[rule]]
-schema = "wxy"
-table = "order_header"
-index = "data"
-type = "order"
-parent = ["SYSTEM_ID", "MEMBER_ID"]
-filter = ["ORDER_ID", "ORDER_CODE", "EXTERNAL_ID", "MEMBER_ID", "CHANNEL_ID", "STORE_ID", "STORE_CODE", "ORDER_DATE", "ORDER_AMOUNT", "PAY_AMOUNT", "USED_POINTS", "CREATE_TIME", "STATUS_ID", "SYSTEM_ID"]
-id = ["SYSTEM_ID", "ORDER_ID"]
-extension = "SYSTEM_ID:wxy"
-
-[[rule]]
-schema = "wxy"
-table = "member_points_item"
-index = "data"
-type = "points"
-parent = ["SYSTEM_ID", "MEMBER_ID"]
-filter = ["MEMBER_POINTS_ITEM_ID", "MEMBER_ID", "POINTS_TYPE_ID", "ACTIVITY_INSTANCE_ID", "ITEM_POINTS_NUMBER", "AVAILABLE_POINTS_NUMBER", "CREATE_TIME", "INVALID_DATE", "POINTS_BALANCE", "POINTS_REASON", "STATUS_ID", "ORDER_ID", "EXTERNAL_ID", "SYSTEM_ID"]
-id = ["SYSTEM_ID", "MEMBER_POINTS_ITEM_ID"]
-extension = "SYSTEM_ID:wxy"
-
-[[rule]]
-schema = "wxy"
-table = "order_coupon"
-index = "data"
-type = "ocoupon"
-parent = ["SYSTEM_ID", "ORDER_ID"]
-filter = ["ORDER_COUPON_ID", "ORDER_ID", "ORDER_ITEM_ID", "COUPON_INSTANCE_ID", "COUPON_PERCENTAGE", "COUPON_AMOUNT", "SYSTEM_ID"]
-id = ["SYSTEM_ID", "ORDER_COUPON_ID"]
-extension = "SYSTEM_ID:wxy"
-
-[[rule]]
-schema = "wxy"
-table = "coupon_instance"
-index = "data"
-type = "cinstance"
-parent = ["SYSTEM_ID", "COUPON_INSTANCE_OWNER"]
-filter = ["COUPON_INSTANCE_ID", "COUPON_ID", "COUPON_NAME", "STATUS_ID", "GET_CHANNEL_ID", "USE_CHANNEL_ID", "STORE_ID", "USE_STORE_CODE", "EXTERNAL_ID", "COUPON_INSTANCE_CODE", "COUPON_INSTANCE_OWNER", "COUPON_INSTANCE_USER", "CREATE_TIME", "GET_TIME", "START_DATE","EXPIRE_DATE", "ACTIVITY_INSTANCE_ID", "ORDER_ID", "SYSTEM_ID"]
-id = ["SYSTEM_ID", "COUPON_INSTANCE_ID"]
-extension = "SYSTEM_ID:wxy"
-
-[[rule]]
-schema = "wxy"
-table = "member_account"
-index = "data"
-type = "account"
-parent = ["SYSTEM_ID", "MEMBER_ID"]
-filter = ["MEMBER_ACCOUNT_ID", "MEMBER_ID", "ACCOUNT_BALANCE", "POINTS_BALANCE", "TOTAL_CONSUMPTION", "TOTAL_CONSUMPTION_COUNT", "TOTAL_TAKEAWAY_AMOUT", "TOTAL_TAKEAWAY_COUNT", "TOTAL_ACCOUNT", "TOTAL_POINTS", "LAST_ACCOUNT_TIME", "LAST_POINTS_TIME", "SYSTEM_ID"]
-id = ["SYSTEM_ID", "MEMBER_ACCOUNT_ID"]
-extension = "SYSTEM_ID:wxy"
+#[[rule]]
+#schema = "wxy"
+#table = "member"
+#index = "data"
+#type = "member"
+#filter = ["MEMBER_ID", "CHANNEL_ID", "GRADE_ID", "MEMBER_CODE", "EMAIL", "MOBILE", "MEMBER_NAME", "GENDER", "BIRTHDAY", "REGISTER_TIME", "STATUS_ID", "SYSTEM_ID"]
+#id = ["SYSTEM_ID", "MEMBER_ID"]
+#extension = "SYSTEM_ID:wxy"
+#
+#[[rule]]
+#schema = "wxy"
+#table = "order_header"
+#index = "data"
+#type = "order"
+#parent = ["SYSTEM_ID", "MEMBER_ID"]
+#filter = ["ORDER_ID", "ORDER_CODE", "EXTERNAL_ID", "MEMBER_ID", "CHANNEL_ID", "STORE_ID", "STORE_CODE", "ORDER_DATE", "ORDER_AMOUNT", "PAY_AMOUNT", "USED_POINTS", "CREATE_TIME", "STATUS_ID", "SYSTEM_ID"]
+#id = ["SYSTEM_ID", "ORDER_ID"]
+#extension = "SYSTEM_ID:wxy"
+#
+#[[rule]]
+#schema = "wxy"
+#table = "member_points_item"
+#index = "data"
+#type = "points"
+#parent = ["SYSTEM_ID", "MEMBER_ID"]
+#filter = ["MEMBER_POINTS_ITEM_ID", "MEMBER_ID", "POINTS_TYPE_ID", "ACTIVITY_INSTANCE_ID", "ITEM_POINTS_NUMBER", "AVAILABLE_POINTS_NUMBER", "CREATE_TIME", "INVALID_DATE", "POINTS_BALANCE", "POINTS_REASON", "STATUS_ID", "ORDER_ID", "EXTERNAL_ID", "SYSTEM_ID"]
+#id = ["SYSTEM_ID", "MEMBER_POINTS_ITEM_ID"]
+#extension = "SYSTEM_ID:wxy"
+#
+#[[rule]]
+#schema = "wxy"
+#table = "order_coupon"
+#index = "data"
+#type = "ocoupon"
+#parent = ["SYSTEM_ID", "ORDER_ID"]
+#filter = ["ORDER_COUPON_ID", "ORDER_ID", "ORDER_ITEM_ID", "COUPON_INSTANCE_ID", "COUPON_PERCENTAGE", "COUPON_AMOUNT", "SYSTEM_ID"]
+#id = ["SYSTEM_ID", "ORDER_COUPON_ID"]
+#extension = "SYSTEM_ID:wxy"
+#
+#[[rule]]
+#schema = "wxy"
+#table = "coupon_instance"
+#index = "data"
+#type = "cinstance"
+#parent = ["SYSTEM_ID", "COUPON_INSTANCE_OWNER"]
+#filter = ["COUPON_INSTANCE_ID", "COUPON_ID", "COUPON_NAME", "STATUS_ID", "GET_CHANNEL_ID", "USE_CHANNEL_ID", "STORE_ID", "USE_STORE_CODE", "EXTERNAL_ID", "COUPON_INSTANCE_CODE", "COUPON_INSTANCE_OWNER", "COUPON_INSTANCE_USER", "CREATE_TIME", "GET_TIME", "START_DATE","EXPIRE_DATE", "ACTIVITY_INSTANCE_ID", "ORDER_ID", "SYSTEM_ID"]
+#id = ["SYSTEM_ID", "COUPON_INSTANCE_ID"]
+#extension = "SYSTEM_ID:wxy"
+#
+#[[rule]]
+#schema = "wxy"
+#table = "member_account"
+#index = "data"
+#type = "account"
+#parent = ["SYSTEM_ID", "MEMBER_ID"]
+#filter = ["MEMBER_ACCOUNT_ID", "MEMBER_ID", "ACCOUNT_BALANCE", "POINTS_BALANCE", "TOTAL_CONSUMPTION", "TOTAL_CONSUMPTION_COUNT", "TOTAL_TAKEAWAY_AMOUT", "TOTAL_TAKEAWAY_COUNT", "TOTAL_ACCOUNT", "TOTAL_POINTS", "LAST_ACCOUNT_TIME", "LAST_POINTS_TIME", "SYSTEM_ID"]
+#id = ["SYSTEM_ID", "MEMBER_ACCOUNT_ID"]
+#extension = "SYSTEM_ID:wxy"

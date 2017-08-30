@@ -3,6 +3,7 @@ package river
 import(
 	"github.com/robfig/cron"
 	"github.com/pkg/errors"
+	"fmt"
 )
 
 type crons struct {
@@ -16,7 +17,7 @@ func NewCron(r *River) (*crons, error) {
 	c := cron.New()
 	// add
 	cronCh := make(chan bool)
-	cronn := &crons{*c, r.c, cronCh, true}
+	cronn := &crons{isSleep: true, cronCh: cronCh, c: r.c}
 	if r.c.IsCron {
 		if r.c.StartJob == "" {
 			return nil, errors.New("not config start_job")
@@ -27,43 +28,58 @@ func NewCron(r *River) (*crons, error) {
 		c.AddFunc(r.c.StartJob, cronn.restart)
 		c.AddFunc(r.c.StopJob, cronn.suspend)
 	}
+	cronn.Cron = *c
 	return cronn, nil
 }
 
 func (c *crons) start() {
-	if c.c.IsCron {
+	fmt.Printf("%v\n", c.c.IsCron)
+	if !c.c.IsCron {
 		return
 	}
-	c.isSleep = false
-	c.Start()
-	c.suspend()
+	c.Cron.Start()
+	fmt.Printf("cron start ....")
+}
+
+func (c *crons) status(method string) {
+	fmt.Printf("method[%s] --> isSleep: %t", method, c.isSleep)
+	fmt.Println("-----------------------------")
 }
 
 func (c *crons) suspend() {
-	if c.c.IsCron || c.isSleep {
+	c.status("suspend")
+	if !c.c.IsCron || c.isSleep {
 		return
 	}
 	c.isSleep = true
+	fmt.Println("do suspend")
 }
 
 func (c *crons) restart() {
-	if c.c.IsCron || !c.isSleep {
+	println("------------------5------------")
+	c.status("restart")
+	if !c.c.IsCron || !c.isSleep {
 		return
 	}
 	c.isSleep = false
 	c.cronCh <- false
+	fmt.Println("do restart")
 }
 
 func (c *crons) canRun() {
-	if c.c.IsCron || !c.isSleep {
+	tt := !c.c.IsCron || !c.isSleep
+	fmt.Printf("can run: %d\n", tt)
+	if !c.c.IsCron || !c.isSleep {
 		return
 	}
 	c.isSleep = <- c.cronCh
+	fmt.Println("do canRun")
 }
 
 func (c *crons) stop() {
-	if c.c.IsCron {
+	if !c.c.IsCron {
 		return
 	}
 	c.Stop()
+	fmt.Println("do stop")
 }
