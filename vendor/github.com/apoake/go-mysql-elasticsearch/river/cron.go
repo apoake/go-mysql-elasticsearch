@@ -43,7 +43,6 @@ func (c *crons) start() {
 
 func (c *crons) status(method string) {
 	fmt.Printf("method[%s] --> isSleep: %t", method, c.isSleep)
-	fmt.Println("-----------------------------")
 }
 
 func (c *crons) suspend() {
@@ -56,7 +55,6 @@ func (c *crons) suspend() {
 }
 
 func (c *crons) restart() {
-	println("------------------5------------")
 	c.status("restart")
 	if !c.c.IsCron || !c.isSleep {
 		return
@@ -67,8 +65,6 @@ func (c *crons) restart() {
 }
 
 func (c *crons) canRun() {
-	tt := !c.c.IsCron || !c.isSleep
-	fmt.Printf("can run: %d\n", tt)
 	if !c.c.IsCron || !c.isSleep {
 		return
 	}
