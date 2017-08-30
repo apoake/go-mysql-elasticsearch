@@ -1,19 +1,15 @@
 # MySQL address, user and password
 # user must have replication privilege in MySQL.
-#my_addr = "120.26.221.15:3306"
-#my_user = "root"
-#my_pass = "xr0XTh8Z"
-#my_charset = "utf8"
-my_addr = "192.168.110.188:3306"
+my_addr = "localhost:3306"
 my_user = "root"
 my_pass = "root"
 my_charset = "utf8"
 
 # Elasticsearch address
-es_addr = "139.196.6.126:80"
+es_addr = "127.0.0.1:9200"
 # Elasticsearch user and password, maybe set by shield, nginx, or x-pack
-es_user = "elastic"
-es_pass = "W*LAxoo^^Io5"
+es_user = ""
+es_pass = ""
 
 # Path to store data, like master.info, if not set or empty,
 # we must use this to support breakpoint resume syncing.
