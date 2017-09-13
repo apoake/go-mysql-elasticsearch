@@ -139,7 +139,7 @@ func (r *River) syncLoop() {
 		case <-r.ctx.Done():
 			return
 		}
-		fmt.Printf("needFlush[%d], needSavePos[%d]\n", needFlush, needSavePos)
+		//fmt.Printf("needFlush[%d], needSavePos[%d]\n", needFlush, needSavePos)
 		if needFlush {
 			// TODO: retry some times?
 			if err := r.doBulk(reqs); err != nil {
